@@ -24,25 +24,26 @@ defmodule Zachaeus do
   Signs a given license and returns an urlsafe Base64 encoded license string.
 
   ## Examples
-      iex> {:ok, _public_key, secret_key} = Salty.Sign.Ed25519.keypair()
-      iex> Zachaeus.sign("invalid_license_type", secret_key)
-      {:error, %Zachaeus.Error{code: :invalid_license, message: "Unable to serialize license due to an invalid type"}}
-
       iex> Zachaeus.sign(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2019-11-15 11:00:00Z]}, "invalid_secret_key")
-      {:error, %Zachaeus.Error{code: :secret_key_invalid, message: "The given secret key must have a size of 64 bytes"}}
+      {:error, %Zachaeus.Error{code: :invalid_secret_key, message: "The given secret key must have a size of 64 bytes"}}
 
       iex> Zachaeus.sign(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2019-11-15 11:00:00Z]}, 123123)
-      {:error, %Zachaeus.Error{code: :secret_key_invalid, message: "The given secret key has an invalid type"}}
+      {:error, %Zachaeus.Error{code: :invalid_secret_key, message: "The given secret key has an invalid type"}}
+
+      iex> {:ok, _public_key, secret_key} = Salty.Sign.Ed25519.keypair()
+      iex> Zachaeus.sign("invalid_license_type", secret_key)
+      {:error, %Zachaeus.Error{code: :invalid_license_type, message: "Unable to serialize license due to an invalid type"}}
 
       {:ok, _public_key, secret_key} = Salty.Sign.Ed25519.keypair()
       Zachaeus.sign(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2019-11-15 11:00:00Z]}, secret_key)
       {:ok, "signed_license..."}
   """
-  @spec sign(License.t(), String.t()) :: {:ok, License.signed()} | {:error, Error.t()}
+  @spec sign(license :: License.t(), secret_key :: String.t()) :: {:ok, License.signed()} | {:error, Error.t()}
   def sign(license, secret_key) do
     with {:ok, serialized_license}   <- License.serialize(license),
          {:ok, validated_secret_key} <- validate_secret_key(secret_key),
-         {:ok, license_signature}    <- Ed25519.sign_detached(serialized_license, validated_secret_key) do
+         {:ok, license_signature}    <- Ed25519.sign_detached(serialized_license, validated_secret_key)
+    do
       encode_signed_license(license_signature <> serialized_license)
     end
   end
@@ -51,33 +52,33 @@ defmodule Zachaeus do
   Verifies a given signed license string against a provided key.
 
   ## Examples
+      iex> Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
+      {:error, %Zachaeus.Error{code: :invalid_public_key, message: "The given public key must have a size of 32 bytes"}}
+
+      iex> Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", 123123)
+      {:error, %Zachaeus.Error{code: :invalid_public_key, message: "The given public key has an invalid type"}}
+
       iex> {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
       iex> Zachaeus.verify("invalid_license_type", public_key)
       {:error, %Zachaeus.Error{code: :signature_not_found, message: "Unable to extract the signature from the signed license"}}
-
-      iex> Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
-      {:error, %Zachaeus.Error{code: :public_key_invalid, message: "The given public key must have a size of 32 bytes"}}
-
-      iex> Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", 123123)
-      {:error, %Zachaeus.Error{code: :public_key_invalid, message: "The given public key has an invalid type"}}
 
       {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
       Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", public_key)
       {:ok, ½Zachaeus.License{...}}
   """
-  @spec verify(License.signed(), String.t()) :: {:ok, License.t()} | {:error, Error.t()}
+  @spec verify(signed_license :: License.signed(), public_key :: String.t()) :: {:ok, License.t()} | {:error, Error.t()}
   def verify(signed_license, public_key) do
     with {:ok, validated_signed_license}      <- validate_signed_license(signed_license),
          {:ok, validated_public_key}          <- validate_public_key(public_key),
          {:ok, decoded_signed_license}        <- decode_signed_license(validated_signed_license),
-         {:ok, signature, serialized_license} <- split_signed_license(decoded_signed_license) do
-
-        case Ed25519.verify_detached(signature, serialized_license, validated_public_key) do
-          :ok ->
-            License.deserialize(serialized_license)
-          _verification_failed ->
-            {:error, %Zachaeus.Error{code: :license_invalid, message: "The license might be tampered as the signature does not match to the license data"}}
-        end
+         {:ok, signature, serialized_license} <- extract_signature(decoded_signed_license)
+    do
+      case Ed25519.verify_detached(signature, serialized_license, validated_public_key) do
+        :ok ->
+          License.deserialize(serialized_license)
+        _verification_failed ->
+          {:error, %Zachaeus.Error{code: :license_tampered, message: "The license might be tampered as the signature does not match to the license data"}}
+      end
     end
   end
 
@@ -85,10 +86,6 @@ defmodule Zachaeus do
   Checks whether a signed license is still valid.
 
   ## Examples
-      iex> {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
-      iex> Zachaeus.valid?("invalid_license_type", public_key)
-      false
-
       iex> Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
       false
 
@@ -96,72 +93,64 @@ defmodule Zachaeus do
       false
 
       {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
+      Zachaeus.valid?("invalid_license_type", public_key)
+      false
+
+      {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
       Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", public_key)
       true
   """
-  @spec valid?(License.signed(), String.t()) :: boolean()
+  @spec valid?(signed_license :: License.signed(), public_key :: String.t()) :: boolean()
   def valid?(signed_license, public_key) do
-    with {:ok, license} <- verify(signed_license, public_key), {:ok, _difference} <- License.validate(license) do
-      true
-    else
-      _verification_error ->
-        false
+    case verify(signed_license, public_key) do
+      {:ok, license} -> License.valid?(license)
+      _verify_failed -> false
     end
   end
 
   ## -- VALIDATION HELPER FUNCTIONS
-  @spec validate_signed_license(License.signed()) :: {:ok, License.signed()} | {:error, Error.t()}
-  defp validate_signed_license(signed_license) when is_binary(signed_license) do
-    cond do
-      String.length(signed_license) <= 0 ->
-        {:error, %Error{code: :signed_license_empty, message: "The given signed license cannot be empty"}}
-
-      true ->
-        {:ok, signed_license}
-    end
-  end
+  @spec validate_signed_license(signed_license :: License.signed()) :: {:ok, License.signed()} | {:error, Error.t()}
+  defp validate_signed_license(signed_license) when is_binary(signed_license) and byte_size(signed_license) > 0,
+    do: {:ok, signed_license}
+  defp validate_signed_license(signed_license) when is_binary(signed_license) and byte_size(signed_license) <= 0,
+    do: {:error, %Error{code: :empty_signed_license, message: "The given signed license cannot be empty"}}
   defp validate_signed_license(_invalid_signed_license),
-    do: {:error, %Error{code: :signed_license_invalid, message: "The given signed license has an invalid type"}}
+    do: {:error, %Error{code: :invalid_signed_license, message: "The given signed license has an invalid type"}}
 
-  @spec validate_public_key(String.t()) :: {:ok, String.t()} | {:error, Error.t()}
+  @spec validate_public_key(public_key :: String.t()) :: {:ok, String.t()} | {:error, Error.t()}
   defp validate_public_key(public_key) when is_binary(public_key) and byte_size(public_key) == 32,
     do: {:ok, public_key}
   defp validate_public_key(public_key) when is_binary(public_key) and byte_size(public_key) != 32,
-    do: {:error, %Error{code: :public_key_invalid, message: "The given public key must have a size of 32 bytes"}}
-  defp validate_public_key(public_key) when not is_binary(public_key),
-    do: {:error, %Error{code: :public_key_invalid, message: "The given public key has an invalid type"}}
+    do: {:error, %Error{code: :invalid_public_key, message: "The given public key must have a size of 32 bytes"}}
+  defp validate_public_key(_invalid_public_key),
+    do: {:error, %Error{code: :invalid_public_key, message: "The given public key has an invalid type"}}
 
-  @spec validate_secret_key(String.t()) :: {:ok, String.t()} | {:error, Error.t()}
+  @spec validate_secret_key(secret_key :: String.t()) :: {:ok, String.t()} | {:error, Error.t()}
   defp validate_secret_key(secret_key) when is_binary(secret_key) and byte_size(secret_key) == 64,
     do: {:ok, secret_key}
   defp validate_secret_key(secret_key) when is_binary(secret_key) and byte_size(secret_key) != 64,
-    do: {:error, %Error{code: :secret_key_invalid, message: "The given secret key must have a size of 64 bytes"}}
-  defp validate_secret_key(secret_key) when not is_binary(secret_key),
-    do: {:error, %Error{code: :secret_key_invalid, message: "The given secret key has an invalid type"}}
+    do: {:error, %Error{code: :invalid_secret_key, message: "The given secret key must have a size of 64 bytes"}}
+  defp validate_secret_key(_invalid_secret_key),
+    do: {:error, %Error{code: :invalid_secret_key, message: "The given secret key has an invalid type"}}
 
   ## -- GENERAL HELPER FUNCTIONS
-  @spec encode_signed_license(String.t()) :: {:ok, License.signed()} | {:error, Error.t()}
+  @spec encode_signed_license(license_data :: String.t()) :: {:ok, License.signed()} | {:error, Error.t()}
   defp encode_signed_license(license_data) when is_binary(license_data) and byte_size(license_data) > 0,
     do: {:ok, Base.url_encode64(license_data, padding: false)}
   defp encode_signed_license(_invalid_license_data),
-    do: {:error, %Error{code: :license_encode_failed, message: "Unable to encode the given license data"}}
+    do: {:error, %Error{code: :encoding_failed, message: "Unable to encode the given license data"}}
 
-  @spec decode_signed_license(License.signed()) :: {:ok, String.t()} | {:error, Error.t()}
+  @spec decode_signed_license(license_data :: License.signed()) :: {:ok, String.t()} | {:error, Error.t()}
   defp decode_signed_license(license_data) when is_binary(license_data) and byte_size(license_data) > 0,
     do: Base.url_decode64(license_data, padding: false)
   defp decode_signed_license(_invalid_license_data),
-    do: {:error, %Error{code: :license_decode_failed, message: "Unable to decode the given license data"}}
+    do: {:error, %Error{code: :decoding_failed, message: "Unable to decode the given license data"}}
 
-  @spec split_signed_license(String.t()) :: {:ok, String.t(), License.serialized()} | {:error, Error.t()}
-  defp split_signed_license(signed_license) when is_binary(signed_license) and byte_size(signed_license) > 0 do
-    try do
-      <<license_signature::binary-size(64), serialized_license::binary>> = signed_license
-      {:ok, license_signature, serialized_license}
-    rescue
-      MatchError ->
-        {:error, %Error{code: :signature_not_found, message: "Unable to extract the signature from the signed license"}}
-    end
-  end
-  defp split_signed_license(_invalid_signed_license),
+  @spec extract_signature(signed_license :: String.t()) :: {:ok, String.t(), License.serialized()} | {:error, Error.t()}
+  defp extract_signature(<<signature::binary-size(64), serialized_license::binary>>),
+    do: {:ok, signature, serialized_license}
+  defp extract_signature(signed_license) when is_binary(signed_license),
+    do: {:error, %Error{code: :signature_not_found, message: "Unable to extract the signature from the signed license"}}
+  defp extract_signature(_invalid_signed_license),
     do: {:error, %Error{code: :invalid_signed_license, message: "Unable to extract the signature due to an invalid type"}}
 end
