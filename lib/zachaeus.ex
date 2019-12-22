@@ -108,6 +108,29 @@ defmodule Zachaeus do
     end
   end
 
+  @doc """
+  Checks whether a signed license is still valid.
+
+  ## Examples
+      iex> Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
+      {:error, %Error{}}
+
+      iex> Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", 123123)
+      {:error, %Error{}}
+
+      {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
+      Zachaeus.validate("invalid_license_type", public_key)
+      {:error, %Error{}}
+
+      {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
+      Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", public_key)
+      {:ok, 166363}
+  """
+  @spec validate(signed_license :: License.signed(), public_key :: String.t()) :: {:ok, Integer.t()} | {:error, Error.t()}
+  def validate(signed_license, public_key) do
+    with {:ok, license} <- verify(signed_license, public_key), do: License.validate(license)
+  end
+
   ## -- VALIDATION HELPER FUNCTIONS
   @spec validate_signed_license(signed_license :: License.signed()) :: {:ok, License.signed()} | {:error, Error.t()}
   defp validate_signed_license(signed_license) when is_binary(signed_license) and byte_size(signed_license) > 0,
