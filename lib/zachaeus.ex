@@ -113,14 +113,14 @@ defmodule Zachaeus do
 
   ## Examples
       iex> Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
-      {:error, %Error{}}
+      {:error, %Zachaeus.Error{code: :invalid_public_key, message: "The given public key must have a size of 32 bytes"}}
 
       iex> Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", 123123)
-      {:error, %Error{}}
+      {:error, %Zachaeus.Error{code: :invalid_public_key, message: "The given public key has an invalid type"}}
 
       {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
       Zachaeus.validate("invalid_license_type", public_key)
-      {:error, %Error{}}
+      {:error, %Zachaeus.Error{}}
 
       {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
       Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", public_key)

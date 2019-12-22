@@ -139,7 +139,7 @@ defmodule Zachaeus.License do
 
   ## Examples
       iex> Zachaeus.License.validate(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2019-11-30 09:50:00Z]})
-      {:error, %Zachaeus.Error{code: :license_expired, message: "The license is outdated"}}
+      {:error, %Zachaeus.Error{code: :license_expired, message: "The license has expired"}}
 
       Zachaeus.License.validate(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2099-11-30 09:50:00Z]})
       {:ok, 12872893}
@@ -158,7 +158,7 @@ defmodule Zachaeus.License do
   def validate(_invalid_license), do: {:error, %Error{code: :invalid_license_type, message: "The given license is invalid"}}
 
   @doc """
-  Validates a license and return a boolean to indicate that the license is outdated.
+  Validates a license and return a boolean to indicate that the license has expired.
 
   ## Examples
       iex> Zachaeus.License.valid?(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2099-11-30 09:50:00Z]})
