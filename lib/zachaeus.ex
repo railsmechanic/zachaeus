@@ -16,7 +16,6 @@ defmodule Zachaeus do
       - Contains an authentication plug which can be used within any compatible web framework e.g. Phoenix
       - No need to store the private key(s), used for license generation, on servers outside your organization
   """
-
   alias Zachaeus.{License, Error}
   alias Salty.Sign.Ed25519
 
@@ -198,21 +197,6 @@ defmodule Zachaeus do
   end
 
   ## -- SETTINGS HELPER FUNCTIONS
-  @spec fetch_configured_secret_key() :: {:ok, binary()} | {:error, Error.t()}
-  defp fetch_configured_secret_key() do
-    case Application.fetch_env(:zachaeus, :secret_key) do
-      {:ok, encoded_secret_key} ->
-        case Base.url_decode64(encoded_secret_key, padding: false) do
-          {:ok, _secret_key} = decoded_secret_key ->
-            decoded_secret_key
-          _error_decoding_secret_key ->
-            {:error, %Error{code: :decoding_failed_secret_key, message: "Unable to decode the configured secret key due to an error"}}
-        end
-      _secret_key_not_found ->
-        {:error, %Error{code: :unconfigured_secret_key, message: "There is no secret key configured for your application"}}
-    end
-  end
-
   @spec fetch_configured_public_key() :: {:ok, binary()} | {:error, Error.t()}
   defp fetch_configured_public_key() do
     case Application.fetch_env(:zachaeus, :secret_key) do
@@ -221,10 +205,25 @@ defmodule Zachaeus do
           {:ok, _public_key} = decoded_public_key ->
             decoded_public_key
           _error_decoding_public_key ->
-            {:error, %Error{code: :decoding_failed_public_key, message: "Unable to decode the configured public key due to an error"}}
+            {:error, %Error{code: :decoding_failed, message: "Unable to decode the configured public key due to an error"}}
         end
       _public_key_not_found ->
         {:error, %Error{code: :unconfigured_public_key, message: "There is no public key configured for your application"}}
+    end
+  end
+
+  @spec fetch_configured_secret_key() :: {:ok, binary()} | {:error, Error.t()}
+  defp fetch_configured_secret_key() do
+    case Application.fetch_env(:zachaeus, :secret_key) do
+      {:ok, encoded_secret_key} ->
+        case Base.url_decode64(encoded_secret_key, padding: false) do
+          {:ok, _secret_key} = decoded_secret_key ->
+            decoded_secret_key
+          _error_decoding_secret_key ->
+            {:error, %Error{code: :decoding_failed, message: "Unable to decode the configured secret key due to an error"}}
+        end
+      _secret_key_not_found ->
+        {:error, %Error{code: :unconfigured_secret_key, message: "There is no secret key configured for your application"}}
     end
   end
 
