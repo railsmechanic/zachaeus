@@ -7,18 +7,18 @@ if Code.ensure_loaded?(Plug) do
 
     The usual functions you'd use in your plug are:
 
-    ### `get_signed_license(conn)`
+    ### `get_license(conn)`
     Try to get a signed license passed from the HTTP authorization request header.
 
     ```elixir
-    {:ok, "lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc..."} = Zachaeus.Plug.get_signed_license(conn)
+    {:ok, "lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc..."} = Zachaeus.Plug.get_license(conn)
     ```
 
-    ### `verify_signed_license(signed_license, conn)`
+    ### `verify_license(signed_license, conn)`
     Verifies a signed license with the `public_key` stored in your configuration environment.
 
     ```elixir
-    {{:ok, %License{}}, conn} = Zachaeus.Plug.verify_signed_license(signed_license, conn)
+    {{:ok, %License{}}, conn} = Zachaeus.Plug.verify_license(signed_license, conn)
     ```
 
     ### `validate_license({signed_license, conn})`
@@ -61,10 +61,10 @@ if Code.ensure_loaded?(Plug) do
         Authorization: lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...
 
     ## Example
-        {:ok, "lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc..."} = Zachaeus.Plug.get_signed_license(conn)
+        {:ok, "lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc..."} = Zachaeus.Plug.get_license(conn)
     """
-    @spec get_signed_license(conn :: Plug.Conn.t()) :: {:ok, License.signed()} | {:error, Error.t()}
-    def get_signed_license(%Plug.Conn{} = conn) do
+    @spec get_license(conn :: Plug.Conn.t()) :: {:ok, License.signed()} | {:error, Error.t()}
+    def get_license(%Plug.Conn{} = conn) do
       case get_req_header(conn, "Authorization") do
         ["Bearer " <> signed_license | _] when is_binary(signed_license) and byte_size(signed_license) > 0 ->
           {:ok, signed_license}
@@ -72,18 +72,18 @@ if Code.ensure_loaded?(Plug) do
           {:error, %Error{code: :license_not_found, message: "Unable to get a signed license from the HTTP Authorization request header"}}
       end
     end
-    def get_signed_license(_non_plug_conn),
+    def get_license(_non_plug_conn),
       do: {:error, %Error{code: :license_not_found, message: "Unable to get a signed license from the HTTP Authorization request header"}}
 
     @doc """
     Verifies a signed license whether it is valid and not tampered.
-    When no signed license could be retrieved by `get_signed_license` it forwards this error.
+    When no signed license could be retrieved by `get_license` it forwards this error.
 
     ## Example
-        {{:ok, %License{}, conn} = Zachaeus.Plug.verify_signed_license({:ok, "lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc..."}, conn)
+        {{:ok, %License{}, conn} = Zachaeus.Plug.verify_license({:ok, "lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc..."}, conn)
     """
-    @spec verify_signed_license({:ok, License.signed()} | {:error, Error.t()}, Plug.Conn.t()) :: {{:ok, License.t()} | {:error, Error.t()}, Plug.Conn.t()}
-    def verify_signed_license({:ok, signed_license}, conn) do
+    @spec verify_license({:ok, License.signed()} | {:error, Error.t()}, Plug.Conn.t()) :: {{:ok, License.t()} | {:error, Error.t()}, Plug.Conn.t()}
+    def verify_license({:ok, signed_license}, conn) do
       case Zachaeus.verify(signed_license, "") do
         {:ok, %License{identifier: identifier, plan: plan}} = license ->
           conn =
@@ -98,9 +98,9 @@ if Code.ensure_loaded?(Plug) do
           {{:error, %Error{code: :verification_failed, message: "Unable to verify the signed license to to an unknown error"}}, conn}
       end
     end
-    def verify_signed_license({:error, %Error{}} = error, conn),
+    def verify_license({:error, %Error{}} = error, conn),
       do: {error, conn}
-    def verify_signed_license(_invalid_license_or_error, conn),
+    def verify_license(_invalid_license_or_error, conn),
       do: {{:error, %Error{code: :verification_failed, message: "Unable to verify the signed license due to an invalid type"}}, conn}
 
     @doc """

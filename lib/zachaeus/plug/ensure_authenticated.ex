@@ -14,8 +14,8 @@ if Code.ensure_loaded?(Plug) do
 
     def call(conn, _opts) do
       conn
-      |> get_signed_license()
-      |> verify_signed_license(conn)
+      |> get_license()
+      |> verify_license(conn)
       |> validate_license()
       |> respond_to_license()
     end
