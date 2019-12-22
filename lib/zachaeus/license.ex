@@ -139,7 +139,7 @@ defmodule Zachaeus.License do
 
   ## Examples
       iex> Zachaeus.License.validate(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2019-11-30 09:50:00Z]})
-      {:error, %Zachaeus.Error{code: :license_outdated, message: "The license is outdated"}}
+      {:error, %Zachaeus.Error{code: :license_expired, message: "The license is outdated"}}
 
       Zachaeus.License.validate(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2099-11-30 09:50:00Z]})
       {:ok, 12872893}
@@ -151,7 +151,7 @@ defmodule Zachaeus.License do
         timerange when timerange in [:eq, :gt] ->
           {:ok, DateTime.diff(valid_until, validation_datetime)}
         _valid_timerange ->
-          {:error, %Error{code: :license_outdated, message: "The license is outdated"}}
+          {:error, %Error{code: :license_expired, message: "The license has expired"}}
       end
     end
   end
