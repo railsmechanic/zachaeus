@@ -83,7 +83,7 @@ if Code.ensure_loaded?(Plug) do
     """
     @spec verify_license({{:ok, License.signed()} | {:error, Error.t()}, Plug.Conn.t()}) :: {{:ok, License.t()} | {:error, Error.t()}, Plug.Conn.t()}
     def verify_license({{:ok, signed_license}, conn}) do
-      case Zachaeus.verify(signed_license, "") do
+      case Zachaeus.verify(signed_license) do
         {:ok, %License{identifier: identifier, plan: plan}} = license ->
           conn =
             conn
@@ -111,7 +111,7 @@ if Code.ensure_loaded?(Plug) do
     """
     @spec validate_license({{:ok, License.t()} | {:error, Error.t()}, Plug.Conn.t()}) :: {{:ok, License.t()} | {:error, Error.t()}, Plug.Conn.t()}
     def validate_license({{:ok, license}, conn}) do
-      case Zachaeus.validate(license, "") do
+      case Zachaeus.validate(license) do
         {:ok, remaining_seconds} ->
           conn =
             conn
