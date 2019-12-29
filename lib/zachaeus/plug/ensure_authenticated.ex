@@ -29,14 +29,14 @@ if Code.ensure_loaded?(Plug) do
       |> fetch_license()
       |> verify_license()
       |> validate_license()
-      |> respond_to_license()
+      |> build_response()
     end
 
-    def respond_to_license({{:ok, _license}, conn}), do: conn
-    def respond_to_license({{:error, %Error{message: reason}}, conn}) do
+    def build_response({conn, {:ok, _license}}), do: conn
+    def build_response({conn, {:error, %Error{message: message}}}) do
       conn
       |> put_resp_content_type("application/json")
-      |> send_resp(:unauthorized, "{error: #{reason}}")
+      |> send_resp(:unauthorized, "{error: #{message}}")
       |> halt()
     end
   end
