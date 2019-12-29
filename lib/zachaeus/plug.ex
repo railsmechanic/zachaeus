@@ -34,7 +34,7 @@ if Code.ensure_loaded?(Plug) do
     alias Zachaeus.{License, Error}
     import Plug.Conn
 
-    ## -- PLUG MACRO(S)
+    ## -- PLUG MACRO
     defmacro __using__(_opts) do
       quote do
         alias Zachaeus.{License, Error}
