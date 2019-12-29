@@ -1,5 +1,4 @@
 import Config
 
-config :zachaeus,
-  public_key: "value1",
-  secret_key: "value2"
+# Imports the config according to the current environment
+import_config "#{Mix.env()}.exs"
