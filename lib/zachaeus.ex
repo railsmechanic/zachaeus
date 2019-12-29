@@ -63,7 +63,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Verifies a signed license with the configured public key.
+  Verifies a signed license against for a configured public key.
 
   ## Examples
       Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...")
@@ -78,7 +78,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Verifies a given signed license string against a provided key.
+  Verifies a given signed license string against a given public key.
 
   ## Examples
       iex> Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
@@ -112,7 +112,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Checks whether a signed license is valid with the configured public key.
+  Checks whether a signed license is valid for a configured public key.
 
   ## Examples
       Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...")
@@ -130,7 +130,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Checks whether a signed license is valid with a given public key.
+  Checks whether a signed license is valid for a given public key.
 
   ## Examples
       iex> Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
@@ -156,7 +156,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Validate whether a signed license is valid with the configured public key.
+  Validate whether a signed license is valid for a configured public key.
 
   ## Examples
       Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...")
@@ -174,7 +174,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Validates whether a signed license is valid with a given public key.
+  Validates whether a signed license is valid for a given public key.
 
   ## Examples
       iex> Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
