@@ -208,7 +208,7 @@ defmodule Zachaeus do
             {:error, %Error{code: :decoding_failed, message: "Unable to decode the configured public key due to an error"}}
         end
       _public_key_not_found ->
-        {:error, %Error{code: :unconfigured_public_key, message: "There is no public key configured for your application"}}
+        {:error, %Error{code: :public_key_unconfigured, message: "There is no public key configured for your application"}}
     end
   end
 
@@ -223,7 +223,7 @@ defmodule Zachaeus do
             {:error, %Error{code: :decoding_failed, message: "Unable to decode the configured secret key due to an error"}}
         end
       _secret_key_not_found ->
-        {:error, %Error{code: :unconfigured_secret_key, message: "There is no secret key configured for your application"}}
+        {:error, %Error{code: :secret_key_unconfigured, message: "There is no secret key configured for your application"}}
     end
   end
 
