@@ -199,7 +199,7 @@ defmodule Zachaeus do
   ## -- SETTINGS HELPER FUNCTIONS
   @spec fetch_configured_public_key() :: {:ok, binary()} | {:error, Error.t()}
   defp fetch_configured_public_key() do
-    case Application.fetch_env(:zachaeus, :secret_key) do
+    case Application.fetch_env(:zachaeus, :public_key) do
       {:ok, encoded_public_key} ->
         case Base.url_decode64(encoded_public_key, padding: false) do
           {:ok, _public_key} = decoded_public_key ->
