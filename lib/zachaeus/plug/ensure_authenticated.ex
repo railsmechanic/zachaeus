@@ -36,7 +36,7 @@ if Code.ensure_loaded?(Plug) do
     def build_response({conn, {:error, %Error{message: message}}}) do
       conn
       |> put_resp_content_type("application/json")
-      |> send_resp(:unauthorized, "{error: #{message}}")
+      |> send_resp(:unauthorized, Jason.encode!(%{error: message}))
       |> halt()
     end
   end
