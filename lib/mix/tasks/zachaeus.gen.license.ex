@@ -8,7 +8,7 @@ defmodule Mix.Tasks.Zachaeus.Gen.License do
 
   Generation of a license only works when a you have already generated a public/secret key pair
   with the `mix zachaeus.gen.keys` generator task and stored at least the secret key in your configuration
-  according to the instructions.
+  according to the instructions. The default time zone in this task is _UTC_, which used for all license dates (valid from and valid until).
 
   The following named arguments are essential to generate a valid license.
 
@@ -33,7 +33,8 @@ defmodule Mix.Tasks.Zachaeus.Gen.License do
 
       mix zachaeus.gen.license --valid-from 2020-01-01 ...
 
-  The date needs to be in ISO8601 format.
+  The provided date needs to be in ISO8601 format.
+  This date will be converted to a 'beginning of day' timestamp in the _UTC_ time zone e.g. `2020-01-01T00:00:00Z`
 
   ## valid_until
   By default, a license requires a timestamp to which the licence is valid.
@@ -42,10 +43,11 @@ defmodule Mix.Tasks.Zachaeus.Gen.License do
 
       mix zachaeus.gen.license --valid-until 2020-12-31 ...
 
-  The date needs to be in ISO8601 format.
+  The provided date needs to be in ISO8601 format.
+  This date will be converted to a 'end of day' timestamp in the _UTC_ time zone e.g. `2020-12-31T23:59:59Z`
 
   ## Support with generating the license
-  This generator requires _ALL_ named options in order to generate a license.
+  This generator requires _ALL_ named options in order to being able generate a license.
   If you forget an option or the format of an input is invalid, the generator returns an error message.
   """
   alias Zachaeus.{Error, License}
@@ -66,12 +68,12 @@ defmodule Mix.Tasks.Zachaeus.Gen.License do
       Mix.shell().info("""
       Used the following data for generating the license:
 
-        IDENTIFIER:  #{license.identifier}
-        PLAN:        #{license.plan}
-        VALID_FROM:  #{DateTime.to_iso8601(license.valid_from)}
-        VALID_UNTIL: #{DateTime.to_iso8601(license.valid_until)}
+        Identifier:  #{license.identifier}
+        Plan:        #{license.plan}
+        Valid from:  #{DateTime.to_iso8601(license.valid_from)}
+        Valid until: #{DateTime.to_iso8601(license.valid_until)}
 
-      The signed license which can be given e.g. to a customer:
+      The generated signed license which can be given e.g. to a customer:
       """)
 
       Mix.shell().info([
