@@ -69,7 +69,7 @@ if Code.ensure_loaded?(Plug) do
     """
     @spec fetch_license(Plug.Conn.t()) :: {Plug.Conn.t(), {:ok, License.signed()} | {:error, Error.t()}}
     def fetch_license(conn) do
-      case get_req_header(conn, "Authorization") do
+      case get_req_header(conn, "authorization") do
         ["Bearer " <> signed_license | _] when is_binary(signed_license) and byte_size(signed_license) > 0 ->
           {conn, {:ok, signed_license}}
         _license_not_found_in_request ->
@@ -87,13 +87,13 @@ if Code.ensure_loaded?(Plug) do
     @spec verify_license({Plug.Conn.t(), {:ok, License.signed()} | {:error, Error.t()}}) :: {Plug.Conn.t(), {:ok, License.t()} | {:error, Error.t()}}
     def verify_license({conn, {:ok, signed_license}}) when is_binary(signed_license) and byte_size(signed_license) > 0 do
       case Zachaeus.verify(signed_license) do
-        {:ok, %License{identifier: identifier, plan: plan}} = license ->
+        {:ok, %License{identifier: identifier, plan: plan}} = result ->
           conn =
             conn
             |> put_private(:zachaeus_identifier, identifier)
             |> put_private(:zachaeus_plan, plan)
 
-          {conn, license}
+          {conn, result}
         {:error, %Error{}} = error ->
           {conn, error}
         _unknown_error ->
@@ -113,13 +113,13 @@ if Code.ensure_loaded?(Plug) do
         {conn, {:ok, %License{...}} = Zachaeus.Plug.validate_license({conn, {:ok, %License{...}}})
     """
     @spec validate_license({Plug.Conn.t(), {:ok, License.t()} | {:error, Error.t()}}) :: {Plug.Conn.t(), {:ok, License.t()} | {:error, Error.t()}}
-    def validate_license({conn, {:ok, %License{} = license}}) do
-      case Zachaeus.validate(license) do
+    def validate_license({conn, {:ok, %License{} = license} = result}) do
+      case License.validate(license) do
         {:ok, remaining_seconds} ->
           conn = conn
             |> put_private(:zachaeus_remaining_seconds, remaining_seconds)
 
-          {conn, license}
+          {conn, result}
         {:error, %Error{}} = error ->
           {conn, error}
         _unknown_error ->
