@@ -145,13 +145,21 @@ defmodule Zachaeus.License do
       {:ok, 12872893}
   """
   @spec validate(__MODULE__.t()) :: {:ok, Integer.t()} | {:error, Zachaeus.Error.t()}
-  def validate(%__MODULE__{valid_until: valid_until}) do
-    with {:ok, valid_until} <- shift_datetime(valid_until), {:ok, validation_datetime} <- shift_datetime(DateTime.utc_now()) do
-      case DateTime.compare(valid_until, validation_datetime) do
-        timerange when timerange in [:eq, :gt] ->
-          {:ok, DateTime.diff(valid_until, validation_datetime)}
-        _valid_timerange ->
-          {:error, %Error{code: :license_expired, message: "The license has expired"}}
+  def validate(%__MODULE__{valid_from: valid_from, valid_until: valid_until}) do
+    with {:ok, valid_from}          <- shift_datetime(valid_from),
+         {:ok, valid_until}         <- shift_datetime(valid_until),
+         {:ok, validation_datetime} <- shift_datetime(DateTime.utc_now())
+    do
+      case DateTime.compare(valid_from, validation_datetime) do
+        from_timerange when from_timerange in [:eq, :lt] ->
+          case DateTime.compare(valid_until, validation_datetime) do
+            until_timerange when until_timerange in [:eq, :gt] ->
+              {:ok, DateTime.diff(valid_until, validation_datetime)}
+            _outdated_license ->
+              {:error, %Error{code: :license_expired, message: "The license has expired"}}
+          end
+        _predated_license ->
+          {:error, %Error{code: :license_predated, message: "The license is not yet valid"}}
       end
     end
   end
