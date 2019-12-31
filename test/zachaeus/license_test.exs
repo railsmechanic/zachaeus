@@ -1,4 +1,4 @@
 defmodule Zachaeus.LicenseTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest Zachaeus.License
 end
