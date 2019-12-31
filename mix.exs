@@ -22,9 +22,10 @@ defmodule Zachaeus.MixProject do
 
   defp deps do
     [
+      {:jason, "~> 1.1"},
       {:salty, "~> 0.1.3", hex: :libsalty},
       {:ex_doc, "~> 0.21.2", only: [:dev]},
-      {:plug, "~> 1.8", only: [:dev]},
+      {:plug, "~> 1.8", optional: true},
     ]
   end
 
