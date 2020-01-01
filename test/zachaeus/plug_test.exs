@@ -236,4 +236,29 @@ defmodule Zachaeus.PlugTest do
       assert Zachaeus.Plug.zachaeus_remaining_seconds(context.conn) == nil
     end
   end
+
+  defmodule CustomAuthentication do
+    use Zachaeus.Plug
+
+    def init(opts), do: opts
+
+    def call(conn, _opts) do
+      build_response({conn, nil})
+    end
+
+    def build_response({conn, _any_data}) do
+      conn
+      |> put_resp_content_type("text/plain")
+      |> send_resp(418, "418 I'm a teapot")
+      |> halt()
+    end
+  end
+
+  test "custom plug usage", context do
+    conn = CustomAuthentication.call(context.conn, [])
+
+    assert conn.resp_body == "418 I'm a teapot"
+    assert conn.status == 418
+    assert conn.halted
+  end
 end
