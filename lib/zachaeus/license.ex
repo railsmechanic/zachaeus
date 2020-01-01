@@ -3,7 +3,6 @@ defmodule Zachaeus.License do
   The license contains all relevant data which is essential for a simple licensing system.
   Due to the nature of a license, it can be used without a database, if you simply want to verify the validity of a license.
   """
-
   alias Zachaeus.Error
 
   ## -- MODULE ATTRIBUTES
@@ -11,10 +10,7 @@ defmodule Zachaeus.License do
   @separator_regex ~r/\|/
 
   ## -- STRUCT DATA
-  defstruct identifier: nil,
-            plan: nil,
-            valid_from: DateTime.utc_now(),
-            valid_until: DateTime.utc_now()
+  defstruct identifier: nil, plan: nil, valid_from: DateTime.utc_now(), valid_until: DateTime.utc_now()
 
   @typedoc """
   The license in the default format.
@@ -110,7 +106,6 @@ defmodule Zachaeus.License do
 
       iex> Zachaeus.License.deserialize("my_user_id_1|default|1542279600|1573815600")
       {:ok, %Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2019-11-15 11:00:00Z]}}
-
   """
   @spec deserialize(serialized_license :: __MODULE__.serialized()) :: {:ok, __MODULE__.t()} | {:error, Zachaeus.Error.t()}
   def deserialize(serialized_license) when is_binary(serialized_license) do
@@ -141,6 +136,9 @@ defmodule Zachaeus.License do
       iex> Zachaeus.License.validate(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2019-11-30 09:50:00Z]})
       {:error, %Zachaeus.Error{code: :license_expired, message: "The license has expired"}}
 
+      iex> Zachaeus.License.validate(%{})
+      {:error, %Zachaeus.Error{code: :invalid_license_type, message: "The given license is invalid"}}
+
       Zachaeus.License.validate(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2099-11-30 09:50:00Z]})
       {:ok, 12872893}
   """
@@ -169,11 +167,14 @@ defmodule Zachaeus.License do
   Validates a license and return a boolean to indicate that the license has expired.
 
   ## Examples
-      iex> Zachaeus.License.valid?(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2099-11-30 09:50:00Z]})
-      true
-
       iex> Zachaeus.License.valid?(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2019-11-30 09:50:00Z]})
       false
+
+      iex> Zachaeus.License.valid?(%{})
+      false
+
+      iex> Zachaeus.License.valid?(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2099-11-30 09:50:00Z]})
+      true
   """
   @spec valid?(__MODULE__.t()) :: boolean()
   def valid?(%__MODULE__{} = license) do
