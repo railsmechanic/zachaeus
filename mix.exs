@@ -35,7 +35,7 @@ defmodule Zachaeus.MixProject do
   end
 
   defp description do
-    "Zachaeus is an easy to use licensing system, which uses asymmetric signing for validating the license."
+    "Zachaeus is an easy to use licensing system inspired by JWT, which is using asymmetric signing."
   end
 
   defp package do
