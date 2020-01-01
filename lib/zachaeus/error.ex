@@ -7,7 +7,7 @@ defmodule Zachaeus.Error do
 
   @typedoc """
   The default error used in Zachaeus.
-  It contains a `code` part, which can be used as an error indicator to customize the error message.
+  It contains a `code` part, which can be used as an indicator to customize the error message.
   """
   @type t() :: %__MODULE__{code: Atom.t(), message: String.t()}
 end
