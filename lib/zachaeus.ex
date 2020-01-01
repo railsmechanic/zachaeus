@@ -16,7 +16,7 @@ defmodule Zachaeus do
       - Contains an authentication plug which can be used within any compatible web framework e.g. Phoenix
       - No need to store the private key(s), used for license generation, on servers outside your organization
   """
-  alias Zachaeus.{License, Error}
+  alias Zachaeus.{Error, License}
   alias Salty.Sign.Ed25519
 
   @doc """
@@ -88,7 +88,7 @@ defmodule Zachaeus do
       {:error, %Zachaeus.Error{code: :invalid_public_key, message: "The given public key has an invalid type"}}
 
       iex> {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
-      iex> Zachaeus.verify("invalid_license_type", public_key)
+      iex> Zachaeus.verify("invalid_license", public_key)
       {:error, %Zachaeus.Error{code: :signature_not_found, message: "Unable to extract the signature from the signed license"}}
 
       {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
@@ -112,61 +112,14 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Checks whether a signed license is valid for a configured public key.
-
-  ## Examples
-      Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...")
-      false
-
-      Zachaeus.valid?("invalid_license_type")
-      false
-
-      Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...")
-      true
-  """
-  @spec valid?(signed_license :: License.signed()) :: boolean()
-  def valid?(signed_license) do
-    with {:ok, public_key} <- fetch_configured_public_key(), do: valid?(signed_license, public_key)
-  end
-
-  @doc """
-  Checks whether a signed license is valid for a given public key.
-
-  ## Examples
-      iex> Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
-      false
-
-      iex> Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", 123123)
-      false
-
-      {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
-      Zachaeus.valid?("invalid_license_type", public_key)
-      false
-
-      {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
-      Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", public_key)
-      true
-  """
-  @spec valid?(signed_license :: License.signed(), public_key :: binary()) :: boolean()
-  def valid?(signed_license, public_key) do
-    case verify(signed_license, public_key) do
-      {:ok, license} -> License.valid?(license)
-      _verify_failed -> false
-    end
-  end
-
-  @doc """
   Validate whether a signed license is valid for a configured public key.
 
   ## Examples
-      Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...")
-      {:error, %Zachaeus.Error{code: :unconfigured_public_key, message: "There is no public key configured for your application"}}
+      iex> Zachaeus.validate("invalid_license")
+      {:error, %Zachaeus.Error{code: :signature_not_found, message: "Unable to extract the signature from the signed license"}}
 
-      Zachaeus.validate("invalid_license_type")
-      {:error, %Zachaeus.Error{}}
-
-      Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...")
-      {:ok, 166363}
+      Zachaeus.validate("QrCTnY52fLzoWquad1ZtYB6EXqjpBRm9dTdGP7cDw2Vl3fuHvZdodW2q0EFNCwvBnY1hxmkrdRDZgHk-NLIEAHVzZXJfMXxkZWZhdWx0X3BsYW58MTU0NjMwMDgwMHw3MjU4MTE4Mzk5")
+      {:ok, 5680217709}
   """
   @spec validate(signed_license :: License.signed()) :: {:ok, Integer.t()} | {:error, Error.t()}
   def validate(signed_license) do
@@ -183,30 +136,76 @@ defmodule Zachaeus do
       iex> Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", 123123)
       {:error, %Zachaeus.Error{code: :invalid_public_key, message: "The given public key has an invalid type"}}
 
-      {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
-      Zachaeus.validate("invalid_license_type", public_key)
-      {:error, %Zachaeus.Error{}}
+      iex> Zachaeus.validate("invalid_license", <<79, 86, 220, 100, 153, 39, 235, 176, 108, 13, 46, 255, 174, 250, 72, 103, 31, 24, 183, 231, 117, 63, 187, 222, 24, 56, 97, 27, 0, 45, 106, 227>>)
+      {:error, %Zachaeus.Error{code: :signature_not_found, message: "Unable to extract the signature from the signed license"}}
 
-      {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
-      Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", public_key)
-      {:ok, 166363}
+      Zachaeus.validate("QrCTnY52fLzoWquad1ZtYB6EXqjpBRm9dTdGP7cDw2Vl3fuHvZdodW2q0EFNCwvBnY1hxmkrdRDZgHk-NLIEAHVzZXJfMXxkZWZhdWx0X3BsYW58MTU0NjMwMDgwMHw3MjU4MTE4Mzk5", <<79, 86, 220, 100, 153, 39, 235, 176, 108, 13, 46, 255, 174, 250, 72, 103, 31, 24, 183, 231, 117, 63, 187, 222, 24, 56, 97, 27, 0, 45, 106, 227>>)
+      {:ok, 5680217709}
   """
   @spec validate(signed_license :: License.signed(), public_key :: String.t()) :: {:ok, Integer.t()} | {:error, Error.t()}
   def validate(signed_license, public_key) do
     with {:ok, license} <- verify(signed_license, public_key), do: License.validate(license)
   end
 
+
+  @doc """
+  Checks whether a signed license is valid for a configured public key.
+
+  ## Examples
+      iex> Zachaeus.valid?("QrCTnY52fLzoWquad1ZtYB6EXqjpBRm9dTdGP7cDw2Vl3fuHvZdodW2q0EFNCwvBnY1hxmkrdRDZgHk-NLIEAHVzZXJfMXxkZWZhdWx0X3BsYW58MTU0NjMwMDgwMHw3MjU4MTE4Mzk3")
+      false
+
+      iex> Zachaeus.valid?("invalid_license_type")
+      false
+
+      iex> Zachaeus.valid?("QrCTnY52fLzoWquad1ZtYB6EXqjpBRm9dTdGP7cDw2Vl3fuHvZdodW2q0EFNCwvBnY1hxmkrdRDZgHk-NLIEAHVzZXJfMXxkZWZhdWx0X3BsYW58MTU0NjMwMDgwMHw3MjU4MTE4Mzk5")
+      true
+  """
+  @spec valid?(signed_license :: License.signed()) :: boolean()
+  def valid?(signed_license) do
+    case verify(signed_license) do
+      {:ok, license} -> License.valid?(license)
+      _verify_failed -> false
+    end
+  end
+
+  @doc """
+  Checks whether a signed license is valid for a given public key.
+
+  ## Examples
+      iex> Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
+      false
+
+      iex> Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", 123123)
+      false
+
+      iex> Zachaeus.valid?("invalid_license", <<79, 86, 220, 100, 153, 39, 235, 176, 108, 13, 46, 255, 174, 250, 72, 103, 31, 24, 183, 231, 117, 63, 187, 222, 24, 56, 97, 27, 0, 45, 106, 227>>)
+      false
+
+      iex> Zachaeus.valid?("QrCTnY52fLzoWquad1ZtYB6EXqjpBRm9dTdGP7cDw2Vl3fuHvZdodW2q0EFNCwvBnY1hxmkrdRDZgHk-NLIEAHVzZXJfMXxkZWZhdWx0X3BsYW58MTU0NjMwMDgwMHw3MjU4MTE4Mzk5", <<79, 86, 220, 100, 153, 39, 235, 176, 108, 13, 46, 255, 174, 250, 72, 103, 31, 24, 183, 231, 117, 63, 187, 222, 24, 56, 97, 27, 0, 45, 106, 227>>)
+      true
+  """
+  @spec valid?(signed_license :: License.signed(), public_key :: binary()) :: boolean()
+  def valid?(signed_license, public_key) do
+    case verify(signed_license, public_key) do
+      {:ok, license} -> License.valid?(license)
+      _verify_failed -> false
+    end
+  end
+
   ## -- SETTINGS HELPER FUNCTIONS
   @spec fetch_configured_public_key() :: {:ok, binary()} | {:error, Error.t()}
   defp fetch_configured_public_key() do
     case Application.fetch_env(:zachaeus, :public_key) do
-      {:ok, encoded_public_key} ->
+      {:ok, encoded_public_key} when is_binary(encoded_public_key) ->
         case Base.url_decode64(encoded_public_key, padding: false) do
           {:ok, _public_key} = decoded_public_key ->
             decoded_public_key
           _error_decoding_public_key ->
             {:error, %Error{code: :decoding_failed, message: "Unable to decode the configured public key due to an error"}}
         end
+      {:ok, public_key} ->
+        {:ok, public_key}
       _public_key_not_found ->
         {:error, %Error{code: :public_key_unconfigured, message: "There is no public key configured for your application"}}
     end
@@ -215,13 +214,15 @@ defmodule Zachaeus do
   @spec fetch_configured_secret_key() :: {:ok, binary()} | {:error, Error.t()}
   defp fetch_configured_secret_key() do
     case Application.fetch_env(:zachaeus, :secret_key) do
-      {:ok, encoded_secret_key} ->
+      {:ok, encoded_secret_key} when is_binary(encoded_secret_key) ->
         case Base.url_decode64(encoded_secret_key, padding: false) do
           {:ok, _secret_key} = decoded_secret_key ->
             decoded_secret_key
           _error_decoding_secret_key ->
             {:error, %Error{code: :decoding_failed, message: "Unable to decode the configured secret key due to an error"}}
         end
+      {:ok, secret_key} ->
+        {:ok, secret_key}
       _secret_key_not_found ->
         {:error, %Error{code: :secret_key_unconfigured, message: "There is no secret key configured for your application"}}
     end
