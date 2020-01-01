@@ -1,7 +1,7 @@
 defmodule Zachaeus.License do
   @moduledoc """
-  The license contains all relevant data which is essential for a simple licensing system.
-  Due to the nature of a license, it can be used without a database, if you simply want to verify the validity of a license.
+  A Zachaeus license contains all relevant data which is essential for a simple licensing system.
+  Due to the nature of a license it can be used without a database, if you simply want to verify the validity of a license.
   """
   alias Zachaeus.Error
 
@@ -37,8 +37,8 @@ defmodule Zachaeus.License do
   - All timestamps are encoded in unix format within the UTC timezone.
 
   ## Example
-  Format:  [<identifier>|<plan>|<valid_from>|<valid_until>]
-  Example: "my_user_id_1|default|1542279600|1573815600"
+      Format:  [<identifier>|<plan>|<valid_from>|<valid_until>]
+      Example: "my_user_id_1|default|1542279600|1573815600"
   """
   @type serialized() :: String.t()
 
@@ -57,8 +57,8 @@ defmodule Zachaeus.License do
 
   ## -- FUNCTIONS
   @doc """
-  Serializes a license into the defined string format.
-  Before serializing, it validates the all license data.
+  Serializes a license struct into the serialized license string format.
+  Before serializing, it does a validation of the given license data.
 
   ## Examples
       iex> Zachaeus.License.serialize(%Zachaeus.License{identifier: 1, plan: "default", valid_from: "invalid datetime", valid_until: ~U[2019-11-15 11:00:00Z]})
@@ -88,8 +88,8 @@ defmodule Zachaeus.License do
   def serialize(_invalid_license), do: {:error, %Error{code: :invalid_license_type, message: "Unable to serialize license due to an invalid type"}}
 
   @doc """
-  Deserializes a license string into a license.
-  After deserializing, it validates the all license data.
+  Deserializes a given license string, which was previously serialized, into a license struct.
+  After deserializing, it does a validation of the given license data.
 
   ## Examples
       iex> Zachaeus.License.deserialize("my_user_id_1|default|invalid datetime|1573815600")
@@ -129,7 +129,7 @@ defmodule Zachaeus.License do
   def deserialize(_invalid_serialized_license), do: {:error, %Error{code: :invalid_license_type, message: "Unable to deserialize license due to an invalid type"}}
 
   @doc """
-  Validates a license and checks whether its outdated.
+  Validates a license and checks whether it is e.g. predated, expired or generally invalid.
   When the license is valid, it returns the remaining license time in seconds.
 
   ## Examples
@@ -164,7 +164,7 @@ defmodule Zachaeus.License do
   def validate(_invalid_license), do: {:error, %Error{code: :invalid_license_type, message: "The given license is invalid"}}
 
   @doc """
-  Validates a license and return a boolean to indicate that the license has expired.
+  Validates a license and checks whether it is e.g. predated, expired or generally invalid and indicates that with a boolean.
 
   ## Examples
       iex> Zachaeus.License.valid?(%Zachaeus.License{identifier: "my_user_id_1", plan: "default", valid_from: ~U[2018-11-15 11:00:00Z], valid_until: ~U[2019-11-30 09:50:00Z]})

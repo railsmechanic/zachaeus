@@ -1,8 +1,8 @@
 defmodule Zachaeus do
   @moduledoc """
-  Zachaeus is a (simple) licensing system, which uses asymmetric signing to generate and validate license tokens.
-  A generated license token contains all relevant data which is required for a simple licensing system.
-  Due to the nature of a license token, it can be used without a database, if you simply want to verify the validity of a license.
+  Zachaeus is a simple and easy to use licensing system, which is using asymmetric signing to generate and validate licenses.
+  A generated license contains all relevant data, which is essential for a simple licensing system.
+  Due to the nature of a zachaeus license, it can be used without a database, if you simply want to verify the validity of a license.
 
   ## Technical details
       - The license token is using the (easy to use) asymmetric signing from NaCl
@@ -11,9 +11,9 @@ defmodule Zachaeus do
       - The license itself is simply encoded as a pipe separated string
 
   ## Features
-      - Generate public/private key(s) from a mix task
-      - Generate license token(s) from a mix task with given data
-      - Contains an authentication plug which can be used within any compatible web framework e.g. Phoenix
+      - Generate public/private key(s) with a mix task
+      - Generate license(s) with a mix task and the given license data
+      - Contains an authentication plug which is compatible with web frameworks e.g. Phoenix
       - No need to store the private key(s), used for license generation, on servers outside your organization
   """
   alias Zachaeus.{Error, License}
@@ -63,7 +63,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Verifies a signed license against for a configured public key.
+  Verifies a signed license with the configured public key.
 
   ## Examples
       Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...")
@@ -78,7 +78,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Verifies a given signed license string against a given public key.
+  Verifies a given signed license string with a given public key.
 
   ## Examples
       iex> Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
@@ -112,7 +112,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Validate whether a signed license is valid for a configured public key.
+  Validates a signed license with a configured public key.
 
   ## Examples
       iex> Zachaeus.validate("invalid_license")
@@ -127,7 +127,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Validates whether a signed license is valid for a given public key.
+  Validates a signed license with a given public key.
 
   ## Examples
       iex> Zachaeus.validate("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")
@@ -149,7 +149,7 @@ defmodule Zachaeus do
 
 
   @doc """
-  Checks whether a signed license is valid for a configured public key.
+  Checks a signed license with the configured public key and indicates whether it is valid using a boolean.
 
   ## Examples
       iex> Zachaeus.valid?("QrCTnY52fLzoWquad1ZtYB6EXqjpBRm9dTdGP7cDw2Vl3fuHvZdodW2q0EFNCwvBnY1hxmkrdRDZgHk-NLIEAHVzZXJfMXxkZWZhdWx0X3BsYW58MTU0NjMwMDgwMHw3MjU4MTE4Mzk3")
@@ -170,7 +170,7 @@ defmodule Zachaeus do
   end
 
   @doc """
-  Checks whether a signed license is valid for a given public key.
+  Checks a signed license with a given public key and indicates whether it is valid using a boolean.
 
   ## Examples
       iex> Zachaeus.valid?("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", "invalid_public_key")

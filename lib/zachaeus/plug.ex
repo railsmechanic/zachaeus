@@ -1,8 +1,8 @@
 if Code.ensure_loaded?(Plug) do
   defmodule Zachaeus.Plug do
     @moduledoc """
-    Provides functions and the behaviour for dealing with Zachaeus in a Plug environment.
-    You can use the following functions to implement plugs with your custom behaviour.
+    Provides functions and a behaviour for dealing with Zachaeus in a Plug environment.
+    You can use the following functions to build plugs with your own behaviour.
     To fulfill the behaviour, the `build_response` callback needs to be implemented within your custom plug.
 
     The usual functions you would use in your plug are:
