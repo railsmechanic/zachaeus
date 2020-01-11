@@ -1,7 +1,7 @@
 defmodule Zachaeus.License do
   @moduledoc """
   A Zachaeus license contains all relevant data which is essential for a simple licensing system.
-  Due to the nature of a license it can be used without a database, if you simply want to verify the validity of a license.
+  Due to the nature of this license, it can be used without a database, if you simply want to verify the validity of a license.
   """
   alias Zachaeus.Error
 
@@ -16,10 +16,10 @@ defmodule Zachaeus.License do
   The license in the default format.
 
   ## License data
-  - `identifier` represents users, entities etc.
-  - `plan` represents e.g. a varying behaviour of your application
-  - `valid_from` represents the start of the license
-  - `valid_until` represents the end of the license
+  - `identifier` represents a user or any other entity etc.
+  - `plan` represents a specifc plan, e.g. to implement a varying behaviour of the application
+  - `valid_from` represents the beginning of the license
+  - `valid_until` represents the ending of the license
   """
   @type t() :: %__MODULE__{
     identifier: String.t(),
@@ -33,7 +33,7 @@ defmodule Zachaeus.License do
 
   ## License encoding format
   - The license data (identifier, plan, valid_from, valid_until) is separated by a `|` (pipe).
-  - None of the given license data is allowed to include a `|` (pipe) symbol (validation required).
+  - None of the given license data is allowed to include a `|` (pipe) symbol.
   - All timestamps are encoded in unix format within the UTC timezone.
 
   ## Example

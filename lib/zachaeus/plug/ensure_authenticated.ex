@@ -3,7 +3,7 @@ if Code.ensure_loaded?(Plug) do
     @moduledoc """
     This plug ensures that a valid and unexpired zachaeus license was provided for this request.
     If the license could not be found, has expired or is just invalid, it returns a JSON error representation.
-    You can use this plug in your own application e.g. within the authentication pipeline.
+    You can use this plug with your application e.g. within a phoenix authentication pipeline.
 
     For example:
       defmodule MyAppWeb.Router do

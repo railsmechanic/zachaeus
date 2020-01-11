@@ -1,8 +1,8 @@
 defmodule Zachaeus.Error do
   @moduledoc """
-  Represents an error throughout the zachaeus package.
-  The error is built with customizability in mind.
-  So you are able to match on a specific code and customize the default message.
+  Represents an error throughout zachaeus.
+  The error is designed with customizability in mind.
+  You are able to match on a specific error code and customize the default message.
 
   ## Example
       iex> case %Zachaeus.Error{code: :some_code, message: "Some default message"} do
