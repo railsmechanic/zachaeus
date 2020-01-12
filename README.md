@@ -1,6 +1,4 @@
 # Zachaeus
-[![Build Status](https://travis-ci.org/railsmechanic/zachaeus.svg?branch=master)](https://travis-ci.org/railsmechanic/zachaeus)
-
 Zachaeus is a simple and easy to use licensing system for your Elixir application.
 It's inspired by JWT, PASETO and other access control systems, which are using asymmetric signing.
 
