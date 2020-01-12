@@ -1,6 +1,6 @@
 # Zachaeus
 Zachaeus is a simple and easy to use licensing system for your Elixir application.
-It's inspired by JWT, PASETO and other access control systems, which are using asymmetric signing.
+It's inspired by JWT, PASETO and other security token systems, which are using asymmetric cryptography.
 
 A generated Zachaeus license contains all relevant data, which is essential for a simple licensing system.
 Because of this nature, Zachaeus can be used without a database and integrates with Plug but can be used outside of it.
@@ -22,9 +22,11 @@ If you're implementing something which needs a licensing system, Zachaeus can wo
 API documentation is available at [https://hexdocs.pm/zachaeus](https://hexdocs.pm/zachaeus)
 
 ## Installation
+#### Required libraries
 Installation of Zachaeus requires the following libraries to be installed:
-- [libsodium](https://download.libsodium.org/doc/) - required for signing/verifying the license
+- [libsodium](https://download.libsodium.org/doc/) - required for doing the hard work of signing/verifying
 
+#### Installation steps
 The package can be installed as Hex package, just add Zachaeus to your application `mix.exs`
 
 ```elixir
