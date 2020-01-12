@@ -1,6 +1,5 @@
 # Zachaeus
 [![Build Status](https://travis-ci.org/railsmechanic/zachaeus.svg?branch=master)](https://travis-ci.org/railsmechanic/zachaeus)
-[![Inline docs](http://inch-ci.org/github/railsmechanic/zachaeus.svg)](http://inch-ci.org/github/railsmechanic/zachaeus)
 
 Zachaeus is a simple and easy to use licensing system for your Elixir application.
 It's inspired by JWT, PASETO and other access control systems, which are using asymmetric signing.
@@ -25,9 +24,10 @@ If you're implementing something which needs a licensing system, Zachaeus can wo
 API documentation is available at [https://hexdocs.pm/zachaeus](https://hexdocs.pm/zachaeus)
 
 ## Installation
-The package can be installed as Hex package:
+Installation of Zachaeus requires the following libraries to be installed:
+- [libsodium](https://download.libsodium.org/doc/) - required for signing/verifying the license
 
-Add Zachaeus to your application `mix.exs`
+The package can be installed as Hex package, just add Zachaeus to your application `mix.exs`
 
 ```elixir
 defp deps do
@@ -37,7 +37,8 @@ end
 
 Run `mix deps.get` to fetch and install the package.
 
-To leverage Zachaeus, you will need to generate a public/secret key pair by running `mix zachaeus.gen.keys`.
+To leverage Zachaeus, you will need to generate a public/secret key pair by running the `mix zachaeus.gen.keys` task.
+
 After running this mix task, you need to add the generated key pair to your configuration `config/config.exs`.
 
 ```elixir
@@ -52,7 +53,9 @@ After adding the key pair to your configuration file, you are able to generate l
 $ mix zachaeus.gen.license --identifier user_1 --plan default_plan --valid-from 2020-01-01 --valid-until 2020-12-31
 ```
 
-Congratulations! You have a working Zachaeus setup.
+🎉🎉 **Congratulations!** 🎉🎉
+
+You now have a working Zachaeus setup.
 
 ## Basics
 Once Zachaeus was set up correctly, you can issue licenses using the `zachaeus.gen.license` mix task (as shown above) or with your own code. For issuing/signing licenses, Zachaeus requires either the configured secret key in your `config/config.exs` or a directly specified secret key.
