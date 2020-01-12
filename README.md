@@ -9,7 +9,7 @@ A generated Zachaeus license contains all relevant data, which is essential for 
 Because of this nature, Zachaeus can be used without a database and integrates with Plug but can be used outside of it.
 If you're implementing something which needs a licensing system, Zachaeus can work for you.
 
-You can use Zachaeus licenses to:
+## Use cases
 - Control access to web endpoints (Plug/Phoenix/<your framework>)
 - Build software, where you want to issue licenses in order to control access and the functional scope
 - Restrict access to any kind of software
