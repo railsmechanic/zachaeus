@@ -1,20 +1,20 @@
 defmodule Zachaeus do
   @moduledoc """
-  Zachaeus is a simple and easy to use licensing system, which is using asymmetric signing to generate and validate licenses.
+  Zachaeus is a simple and easy to use licensing system, which uses asymmetric signing to generate and validate licenses.
   A generated license contains all relevant data, which is essential for a simple licensing system.
   Due to the nature of a zachaeus license, it can be used without a database, if you simply want to verify the validity of a license.
 
   ## Technical details
-      - The license token is using the (easy to use) asymmetric signing from NaCl
-      - The license token is encoded with Base64 in an urlsafe format
-      - The timestamp(s) used within zachaeus are encoded using the UTC timezone
-      - The license itself is simply encoded as a pipe separated string
+  - The license token is using the (easy to use) asymmetric signing from NaCl
+  - The license token is encoded with Base64 in an urlsafe format
+  - The timestamp(s) used within zachaeus are encoded using the UTC timezone
+  - The license itself is simply encoded as a pipe separated string
 
   ## Features
-      - Generate public/private key(s) with a mix task
-      - Generate license(s) with a mix task and the given license data
-      - Contains an authentication plug which is compatible with web frameworks e.g. Phoenix
-      - No need to store the private key(s), used for license generation, on servers outside your organization
+  - Generate public/private key(s) with a mix task
+  - Generate license(s) with a mix task and the given license data
+  - Contains an authentication plug which is compatible with web frameworks e.g. Phoenix
+  - No need to store the private key(s), used for license generation, on servers outside your organization
   """
   alias Zachaeus.{Error, License}
   alias Salty.Sign.Ed25519
@@ -93,7 +93,7 @@ defmodule Zachaeus do
 
       {:ok, public_key, _secret_key} = Salty.Sign.Ed25519.keypair()
       Zachaeus.verify("lzcAxWfls4hDHs8fHwJu53AWsxX08KYpxGUwq4qsc...", public_key)
-      {:ok, ½Zachaeus.License{...}}
+      {:ok, %Zachaeus.License{...}}
   """
   @spec verify(signed_license :: License.signed(), public_key :: binary()) :: {:ok, License.t()} | {:error, Error.t()}
   def verify(signed_license, public_key) do
