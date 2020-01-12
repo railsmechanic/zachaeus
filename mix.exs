@@ -1,14 +1,14 @@
 defmodule Zachaeus.MixProject do
   use Mix.Project
 
-  @source_url  "https://github.com/railsmechanic/nanoid"
+  @source_url  "https://github.com/railsmechanic/zachaeus"
   @maintainers ["Matthias Kalb"]
 
   def project do
     [
       name: "Zachaeus",
       app: :zachaeus,
-      version: "0.1.0",
+      version: "1.0.0",
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -35,7 +35,7 @@ defmodule Zachaeus.MixProject do
   end
 
   defp description do
-    "Zachaeus is an easy to use licensing system inspired by JWT, which is using asymmetric signing."
+    "Zachaeus is an easy to use licensing system, which uses asymmetric signing to generate and validate licenses."
   end
 
   defp package do
