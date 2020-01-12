@@ -1,4 +1,4 @@
-import Config
+import Mix.Config
 
 config :zachaeus,
   public_key: "T1bcZJkn67BsDS7_rvpIZx8Yt-d1P7veGDhhGwAtauM",
