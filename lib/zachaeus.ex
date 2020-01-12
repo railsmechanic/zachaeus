@@ -4,8 +4,13 @@ defmodule Zachaeus do
   A generated license contains all relevant data, which is essential for a simple licensing system.
   Due to the nature of a zachaeus license, it can be used without a database, if you simply want to verify the validity of a license.
 
+  ## Use cases
+  - Control access to web endpoints (Plug/Phoenix/<your framework>)
+  - Build software, where you want to issue licenses in order to control access and the functional scope
+  - Restrict access to any kind of software
+
   ## Technical details
-  - The license token is using the (easy to use) asymmetric signing from NaCl
+  - The license token depends on the (easy to use) asymmetric signing from NaCl
   - The license token is encoded with Base64 in an urlsafe format
   - The timestamp(s) used within zachaeus are encoded using the UTC timezone
   - The license itself is simply encoded as a pipe separated string
@@ -14,7 +19,8 @@ defmodule Zachaeus do
   - Generate public/private key(s) with a mix task
   - Generate license(s) with a mix task and the given license data
   - Contains an authentication plug which is compatible with web frameworks e.g. Phoenix
-  - No need to store the private key(s), used for license generation, on servers outside your organization
+  - No need to store the private key, used for license generation, on servers outside your organization
+  - A license contains all relevant data, therefore you don't even need a database
   """
   alias Zachaeus.{Error, License}
   alias Salty.Sign.Ed25519
