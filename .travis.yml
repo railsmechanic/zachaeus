@@ -15,3 +15,11 @@ matrix:
 
 script:
   - mix test
+
+addons:
+  apt:
+    packages:
+      - libsodium-dev
+      - gcc
+      - make
+      - erlang-dev
