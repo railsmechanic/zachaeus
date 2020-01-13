@@ -181,5 +181,22 @@ config :zachaeus,
 
 _&#9658; I recommend not to set the `secret_key` configuration value in a publicly available environment!_
 
+## Errors
+Zachaeus offers the ability to customize the returned error message through general error codes.
+Here's the [list of errors](ERRORS.md).
+
+```elixir
+# Sample error
+sample_error = %Zachaeus.Error{code: :license_expired, message: "The license has expired"}
+
+# Match on the error code 'license_expired'
+case sample_error do
+  %Zachaeus.Error{code: :license_expired} ->
+    {:error, "Hey dude, your license has expired!"}
+  _any_other_error ->
+    {:error, "Something unexpected happened"}
+end
+```
+
 ## License
 The MIT License (MIT). Please see [License File](LICENSE) for more information.
