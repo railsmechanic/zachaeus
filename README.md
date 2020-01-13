@@ -183,7 +183,6 @@ _&#9658; I recommend not to set the `secret_key` configuration value in a public
 
 ## Errors
 Zachaeus offers the ability to customize the returned error message through general error codes.
-Here's the [list of errors](ERRORS.md).
 
 ```elixir
 # Sample error
@@ -197,6 +196,7 @@ case sample_error do
     {:error, "Something unexpected happened"}
 end
 ```
+Here's the current [list of errors](ERRORS.md) returned by Zachaeus.
 
 ## License
 The MIT License (MIT). Please see [License File](LICENSE) for more information.
